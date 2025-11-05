@@ -1,0 +1,39 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Build Artifacts
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Dependency Directories
+node_modules/
+vendor/
+target/
+dist/
+build/
+.gradle/
+.idea/
+.vscode/
+
+# Environment Variables
+.env
+.env.*
+.venv/
+
+# BMAD specific ignores (if any, though usually everything is versioned)
+# .bmad-core/
+# .gemini/
+
+# Other common ignores
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tgz
+*.sql
+*.sqlite
+*.db
