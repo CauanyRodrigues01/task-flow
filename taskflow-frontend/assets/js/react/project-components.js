@@ -69,8 +69,9 @@ const ProjectListPage = () => {
             const fetchedProjects = await window.apiClient.get('/api/v1/projects');
             setProjects(fetchedProjects);
         } catch (error) {
-            alert(`Erro ao carregar projetos: ${error.message}`);
-            console.error('Erro ao carregar projetos:', error);
+            const errorMessage = error.toString();
+            alert(`Erro ao carregar projetos: ${errorMessage}`);
+            console.error('Erro detalhado ao carregar projetos:', error);
         }
     };
 

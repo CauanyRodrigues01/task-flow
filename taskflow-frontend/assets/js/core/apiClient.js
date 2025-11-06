@@ -1,6 +1,6 @@
 (() => {
-    // Usar caminho relativo para a API para evitar problemas de CORS em desenvolvimento.
-     const baseURL = "http://localhost:8080";
+    // Define a URL base para a API do backend.
+    const baseURL = "http://localhost:8080";
 
     async function request(method, path, body) {
         const url = `${baseURL}${path}`;
@@ -22,14 +22,26 @@
 
         try {
             const response = await fetch(url, init);
-            const data = await response.json();
+            const contentType = response.headers.get("content-type");
 
             if (!response.ok) {
-                const errorMessage = data.message || response.statusText;
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || JSON.stringify(errorData);
+                } else {
+                    errorMessage = await response.text();
+                }
                 throw new Error(errorMessage);
             }
 
-            return data;
+            // Handle empty JSON response
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                 const text = await response.text();
+                 return text ? JSON.parse(text) : {}; // Return empty object for empty response
+            } 
+            return response.text(); // Return as text if not json
+
         } catch (err) {
             console.error('API Error:', { url, method, body, error: err });
             throw err;
