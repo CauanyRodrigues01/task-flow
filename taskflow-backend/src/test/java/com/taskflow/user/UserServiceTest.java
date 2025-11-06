@@ -1,9 +1,7 @@
 package com.taskflow.user;
 
 import com.taskflow.security.JwtService;
-import com.taskflow.user.dto.AuthResponse;
-import com.taskflow.user.dto.LoginRequest;
-import com.taskflow.user.dto.RegistroRequest;
+import com.taskflow.user.dto.UserCreationRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,9 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -35,104 +34,105 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private RegistroRequest registroRequest;
-    private LoginRequest loginRequest;
-    private User user;
+    private User adminUser;
+    private User collaboratorUser;
 
     @BeforeEach
     void setUp() {
-        registroRequest = RegistroRequest.builder()
-                .name("Teste")
-                .email("teste@example.com")
-                .password("senha123")
-                .build();
-
-        loginRequest = LoginRequest.builder()
-                .email("teste@example.com")
-                .password("senha123")
-                .build();
-
-        user = User.builder()
+        adminUser = User.builder()
                 .id(1L)
-                .name("Teste")
-                .email("teste@example.com")
-                .passwordHash("hashedPassword")
+                .name("Admin User")
+                .email("admin@example.com")
+                .passwordHash("hashed_password")
+                .role(Role.ADMIN)
+                .build();
+
+        collaboratorUser = User.builder()
+                .id(2L)
+                .name("Collaborator User")
+                .email("collaborator@example.com")
+                .passwordHash("hashed_password")
                 .role(Role.COLLABORATOR)
                 .build();
     }
 
     @Test
-    void deveRegistrarNovoUsuarioComSucesso() {
-        when(userRepository.findByEmail(registroRequest.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(registroRequest.getPassword())).thenReturn("hashedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(jwtService.generateToken(any(User.class))).thenReturn("jwtTokenGerado");
+    void getAllUsers_shouldReturnListOfUsers() {
+        when(userRepository.findAll()).thenReturn(Arrays.asList(adminUser, collaboratorUser));
 
-        AuthResponse resultado = userService.registrarUsuario(registroRequest);
+        List<User> users = userService.getAllUsers();
 
-        assertNotNull(resultado);
-        assertEquals("jwtTokenGerado", resultado.getToken());
-        assertEquals("teste@example.com", resultado.getEmail());
-        assertEquals("COLLABORATOR", resultado.getRole());
+        assertNotNull(users);
+        assertEquals(2, users.size());
+        assertEquals(adminUser.getEmail(), users.get(0).getEmail());
+    }
+
+    @Test
+    void inviteUser_shouldCreateNewUser() {
+        UserCreationRequest request = new UserCreationRequest("New User", "newuser@example.com", "password", Role.COLLABORATOR);
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("hashed_password");
+        User newUserToReturn = User.builder()
+                .id(3L)
+                .name(request.getName())
+                .email(request.getEmail())
+                .passwordHash("hashed_password")
+                .role(request.getRole())
+                .build();
+        when(userRepository.save(any(User.class))).thenReturn(newUserToReturn);
+
+        User newUser = userService.inviteUser(request);
+
+        assertNotNull(newUser);
+        assertEquals(request.getEmail(), newUser.getEmail());
+        assertEquals(Role.COLLABORATOR, newUser.getRole());
         verify(userRepository, times(1)).save(any(User.class));
-        verify(jwtService, times(1)).generateToken(any(User.class));
     }
 
     @Test
-    void deveLancarExcecaoQuandoEmailJaRegistrado() {
-        when(userRepository.findByEmail(registroRequest.getEmail())).thenReturn(Optional.of(user));
+    void inviteUser_withExistingEmail_shouldThrowException() {
+        UserCreationRequest request = new UserCreationRequest("Admin User", "admin@example.com", "password", Role.COLLABORATOR);
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(adminUser));
 
-        assertThrows(EmailJaRegistradoException.class, () -> userService.registrarUsuario(registroRequest));
+        assertThrows(EmailJaRegistradoException.class, () -> userService.inviteUser(request));
         verify(userRepository, never()).save(any(User.class));
-        verify(jwtService, never()).generateToken(any(User.class));
     }
 
     @Test
-    void deveAutenticarUsuarioComSucessoERetornarToken() {
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user)).thenReturn("jwtTokenGerado");
+    void removeUser_shouldDeleteUser() {
+        when(userRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(userRepository).deleteById(1L);
 
-        String token = userService.autenticarUsuario(loginRequest);
+        userService.removeUser(1L);
 
-        assertNotNull(token);
-        assertEquals("jwtTokenGerado", token);
-        verify(authenticationManager, times(1)).authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+        verify(userRepository, times(1)).deleteById(1L);
     }
 
     @Test
-    void deveLancarExcecaoQuandoUsuarioNaoEncontradoNaAutenticacao() {
-        doThrow(new RuntimeException("Bad credentials"))
-                .when(authenticationManager).authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                loginRequest.getEmail(),
-                                loginRequest.getPassword()
-                        )
-                );
+    void removeUser_withNonExistingUser_shouldThrowException() {
+        when(userRepository.existsById(1L)).thenReturn(false);
 
-        assertThrows(RuntimeException.class, () -> userService.autenticarUsuario(loginRequest));
+        assertThrows(UserNotFoundException.class, () -> userService.removeUser(1L));
+        verify(userRepository, never()).deleteById(any(Long.class));
     }
 
     @Test
-    void deveEncontrarUsuarioPorEmailComSucesso() {
-        when(userRepository.findByEmail("teste@example.com")).thenReturn(Optional.of(user));
+    void updateUserRole_shouldUpdateUserRole() {
+        when(userRepository.findById(2L)).thenReturn(Optional.of(collaboratorUser));
+        when(userRepository.save(any(User.class))).thenReturn(adminUser); // Simulating collaborator becoming admin
 
-        Optional<User> foundUser = userService.findUserByEmail("teste@example.com");
+        User updatedUser = userService.updateUserRole(2L, Role.ADMIN);
 
-        assertTrue(foundUser.isPresent());
-        assertEquals("teste@example.com", foundUser.get().getEmail());
+        assertNotNull(updatedUser);
+        assertEquals(Role.ADMIN, updatedUser.getRole());
+        verify(userRepository, times(1)).save(collaboratorUser);
     }
 
     @Test
-    void naoDeveEncontrarUsuarioPorEmailInexistente() {
-        when(userRepository.findByEmail("naoexiste@example.com")).thenReturn(Optional.empty());
+    void updateUserRole_withNonExistingUser_shouldThrowException() {
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        Optional<User> foundUser = userService.findUserByEmail("naoexiste@example.com");
-
-        assertFalse(foundUser.isPresent());
+        assertThrows(UserNotFoundException.class, () -> userService.updateUserRole(1L, Role.ADMIN));
+        verify(userRepository, never()).save(any(User.class));
     }
 }

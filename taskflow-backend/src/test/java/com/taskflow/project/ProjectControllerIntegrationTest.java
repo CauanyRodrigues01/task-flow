@@ -1,5 +1,9 @@
 package com.taskflow.project;
 
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taskflow.project.dto.ProjectRequest;
 import com.taskflow.user.Role;
@@ -9,10 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -27,9 +29,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.taskflow.BaseIntegrationTest;
+
 @SpringBootTest
 @AutoConfigureMockMvc
-class ProjectControllerIntegrationTest {
+@ActiveProfiles("test")
+@TestPropertySource(properties = {"spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration"})
+class ProjectControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -37,8 +43,11 @@ class ProjectControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private ProjectService projectService;
+
+    @MockitoBean // Adicionar o mock para UserDetailsService
+    private UserDetailsService userDetailsService;
 
     private User projectManager;
     private Project project;
@@ -49,7 +58,8 @@ class ProjectControllerIntegrationTest {
                 .id(1L)
                 .name("Project Manager")
                 .email("pm@example.com")
-                .role(Role.MANAGER)
+                .passwordHash("hashedpassword") // Adicionar um hash (importante para UserDetails)
+                .role(Role.ADMIN)
                 .build();
 
         project = Project.builder()
@@ -60,13 +70,12 @@ class ProjectControllerIntegrationTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        // Set up security context for authenticated user
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(projectManager, null, projectManager.getAuthorities())
-        );
+        // Configurar o UserDetailsService para ser usado pelo @WithUserDetails
+        when(userDetailsService.loadUserByUsername(projectManager.getEmail())).thenReturn(projectManager);
     }
 
     @Test
+    @WithUserDetails("pm@example.com")
     void createProject_shouldReturnCreatedProject() throws Exception {
         ProjectRequest request = ProjectRequest.builder()
                 .name("New Project")
@@ -92,6 +101,7 @@ class ProjectControllerIntegrationTest {
     }
 
     @Test
+    @WithUserDetails("pm@example.com")
     void getAllProjects_shouldReturnListOfProjects() throws Exception {
         when(projectService.getAllProjects()).thenReturn(Arrays.asList(project));
 
@@ -102,6 +112,7 @@ class ProjectControllerIntegrationTest {
     }
 
     @Test
+    @WithUserDetails("pm@example.com")
     void getProjectById_shouldReturnProjectWhenFound() throws Exception {
         when(projectService.getProjectById(anyLong())).thenReturn(Optional.of(project));
 
@@ -112,6 +123,7 @@ class ProjectControllerIntegrationTest {
     }
 
     @Test
+    @WithUserDetails("pm@example.com")
     void getProjectById_shouldReturnNotFoundWhenNotFound() throws Exception {
         when(projectService.getProjectById(anyLong())).thenReturn(Optional.empty());
 
@@ -121,6 +133,7 @@ class ProjectControllerIntegrationTest {
     }
 
     @Test
+    @WithUserDetails("pm@example.com")
     void updateProject_shouldReturnUpdatedProject() throws Exception {
         ProjectRequest request = ProjectRequest.builder()
                 .name("Updated Project Name")
@@ -146,6 +159,7 @@ class ProjectControllerIntegrationTest {
     }
 
     @Test
+    @WithUserDetails("pm@example.com")
     void deleteProject_shouldReturnNoContent() throws Exception {
         doNothing().when(projectService).deleteProject(anyLong());
         when(projectService.isProjectOwner(anyLong(), anyLong())).thenReturn(true); // Mock for @PreAuthorize
@@ -153,5 +167,19 @@ class ProjectControllerIntegrationTest {
         mockMvc.perform(delete("/api/v1/projects/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void createProject_shouldReturnUnauthorized_whenNotAuthenticated() throws Exception {
+        ProjectRequest request = ProjectRequest.builder()
+                .name("Unauthorized Project")
+                .description("Should fail")
+                .build();
+
+        // Note: Não há @WithUserDetails aqui
+        mockMvc.perform(post("/api/v1/projects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized()); // Ou isForbidden() dependendo da sua config
     }
 }

@@ -4,12 +4,15 @@ import com.taskflow.security.JwtService;
 import com.taskflow.user.dto.AuthResponse;
 import com.taskflow.user.dto.LoginRequest;
 import com.taskflow.user.dto.RegistroRequest;
+import com.taskflow.user.dto.UserCreationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -56,4 +59,41 @@ public class UserService {
     public Optional<User> findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Transactional
+    public User inviteUser(UserCreationRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailJaRegistradoException("Email já registrado: " + request.getEmail());
+        }
+
+        User newUser = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .role(request.getRole() != null ? request.getRole() : Role.COLLABORATOR)
+                .build();
+        return userRepository.save(newUser);
+    }
+
+    @Transactional
+    public void removeUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("Usuário não encontrado com ID: " + userId);
+        }
+        userRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public User updateUserRole(Long userId, Role newRole) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado com ID: " + userId));
+        user.setRole(newRole);
+        return userRepository.save(user);
+    }
 }
+

@@ -1,5 +1,7 @@
 package com.taskflow.user;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,6 +39,8 @@ public class User implements UserDetails {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
+    @Convert(converter = RoleConverter.class)
+    @Column(columnDefinition = "VARCHAR(255)")
     private Role role;
 
     @Override
