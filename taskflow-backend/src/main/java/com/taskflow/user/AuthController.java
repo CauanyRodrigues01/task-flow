@@ -37,4 +37,9 @@ public class AuthController {
     public ResponseEntity<String> handleEmailJaRegistradoException(EmailJaRegistradoException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleAuthenticationException(Exception ex) {
+        return new ResponseEntity<>("Authentication failed: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
 }
