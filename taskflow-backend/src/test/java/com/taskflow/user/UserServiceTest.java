@@ -1,6 +1,7 @@
 package com.taskflow.user;
 
 import com.taskflow.security.JwtService;
+import com.taskflow.user.dto.AuthResponse;
 import com.taskflow.user.dto.LoginRequest;
 import com.taskflow.user.dto.RegistroRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,37 +42,40 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         registroRequest = RegistroRequest.builder()
-                .nome("Teste")
+                .name("Teste")
                 .email("teste@example.com")
-                .senha("senha123")
+                .password("senha123")
                 .build();
 
         loginRequest = LoginRequest.builder()
                 .email("teste@example.com")
-                .senha("senha123")
+                .password("senha123")
                 .build();
 
         user = User.builder()
                 .id(1L)
-                .nome("Teste")
+                .name("Teste")
                 .email("teste@example.com")
-                .hashSenha("hashedPassword")
-                .perfil("COLLABORATOR")
+                .passwordHash("hashedPassword")
+                .role(Role.COLLABORATOR)
                 .build();
     }
 
     @Test
     void deveRegistrarNovoUsuarioComSucesso() {
         when(userRepository.findByEmail(registroRequest.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(registroRequest.getSenha())).thenReturn("hashedPassword");
+        when(passwordEncoder.encode(registroRequest.getPassword())).thenReturn("hashedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
+        when(jwtService.generateToken(any(User.class))).thenReturn("jwtTokenGerado");
 
-        User resultado = userService.registrarUsuario(registroRequest);
+        AuthResponse resultado = userService.registrarUsuario(registroRequest);
 
         assertNotNull(resultado);
+        assertEquals("jwtTokenGerado", resultado.getToken());
         assertEquals("teste@example.com", resultado.getEmail());
-        assertEquals("COLLABORATOR", resultado.getPerfil());
+        assertEquals("COLLABORATOR", resultado.getRole());
         verify(userRepository, times(1)).save(any(User.class));
+        verify(jwtService, times(1)).generateToken(any(User.class));
     }
 
     @Test
@@ -80,6 +84,7 @@ class UserServiceTest {
 
         assertThrows(EmailJaRegistradoException.class, () -> userService.registrarUsuario(registroRequest));
         verify(userRepository, never()).save(any(User.class));
+        verify(jwtService, never()).generateToken(any(User.class));
     }
 
     @Test
@@ -91,14 +96,43 @@ class UserServiceTest {
 
         assertNotNull(token);
         assertEquals("jwtTokenGerado", token);
-        verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(authenticationManager, times(1)).authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
+        );
     }
 
     @Test
     void deveLancarExcecaoQuandoUsuarioNaoEncontradoNaAutenticacao() {
         doThrow(new RuntimeException("Bad credentials"))
-                .when(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+                .when(authenticationManager).authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                loginRequest.getEmail(),
+                                loginRequest.getPassword()
+                        )
+                );
 
         assertThrows(RuntimeException.class, () -> userService.autenticarUsuario(loginRequest));
+    }
+
+    @Test
+    void deveEncontrarUsuarioPorEmailComSucesso() {
+        when(userRepository.findByEmail("teste@example.com")).thenReturn(Optional.of(user));
+
+        Optional<User> foundUser = userService.findUserByEmail("teste@example.com");
+
+        assertTrue(foundUser.isPresent());
+        assertEquals("teste@example.com", foundUser.get().getEmail());
+    }
+
+    @Test
+    void naoDeveEncontrarUsuarioPorEmailInexistente() {
+        when(userRepository.findByEmail("naoexiste@example.com")).thenReturn(Optional.empty());
+
+        Optional<User> foundUser = userService.findUserByEmail("naoexiste@example.com");
+
+        assertFalse(foundUser.isPresent());
     }
 }

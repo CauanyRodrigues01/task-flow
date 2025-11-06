@@ -15,21 +15,21 @@ public class AuthController {
 
     private final UserService userService;
 
-    @PostMapping("/registrar")
-    public ResponseEntity<User> registrar(@RequestBody RegistroRequest request) {
-        User novoUsuario = userService.registrarUsuario(request);
-        return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> registrar(@RequestBody RegistroRequest request) {
+        AuthResponse authResponse = userService.registrarUsuario(request);
+        return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         String jwt = userService.autenticarUsuario(request);
-        User usuario = userService.userRepository.findByEmail(request.getEmail())
+        User usuario = userService.findUserByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado após autenticação"));
         return ResponseEntity.ok(AuthResponse.builder()
                 .token(jwt)
                 .email(usuario.getEmail())
-                .perfil(usuario.getPerfil())
+                .role(usuario.getRole().name())
                 .build());
     }
 
