@@ -71,8 +71,8 @@ public class ProjectController {
                 .id(project.getId())
                 .name(project.getName())
                 .description(project.getDescription())
-                .ownerId(project.getOwner().getId())
-                .ownerName(project.getOwner().getName())
+                .ownerId(project.getOwner() != null ? project.getOwner().getId() : null)
+                .ownerName(project.getOwner() != null ? project.getOwner().getName() : null)
                 .createdAt(project.getCreatedAt())
                 .build();
     }

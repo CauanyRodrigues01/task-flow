@@ -33,7 +33,7 @@ public class UserService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(Role.COLLABORATOR) // Perfil padrão
+                .role(Role.ADMIN) // Perfil padrão alterado para ADMIN para teste
                 .build();
         User savedUser = userRepository.save(usuario);
         var jwtToken = jwtService.generateToken(savedUser);
