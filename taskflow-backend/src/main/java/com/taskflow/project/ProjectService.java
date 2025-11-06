@@ -56,4 +56,37 @@ public class ProjectService {
                 .map(project -> project.getOwner().getId().equals(userId))
                 .orElse(false);
     }
+
+    @PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
+    public java.util.Set<com.taskflow.user.User> getProjectMembers(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        return project.getMembers();
+    }
+
+    @PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN') and @projectService.isProjectOwner(#projectId, authentication.principal.id)")
+    public void addMember(Long projectId, Long userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!"COLLABORATOR".equals(user.getRole())) {
+            throw new RuntimeException("Only users with COLLABORATOR role can be added to projects.");
+        }
+
+        project.getMembers().add(user);
+        projectRepository.save(project);
+    }
+
+    @PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN') and @projectService.isProjectOwner(#projectId, authentication.principal.id)")
+    public void removeMember(Long projectId, Long userId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        project.getMembers().remove(user);
+        projectRepository.save(project);
+    }
 }

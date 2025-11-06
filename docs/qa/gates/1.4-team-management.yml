@@ -1,0 +1,25 @@
+schema: 1
+story: "1.4"
+story_title: "Gestão de Equipes de Projeto pelo Gerente de Projeto"
+gate: "CONCERNS"
+status_reason: "A funcionalidade do backend foi entregue, mas persistem os desvios de arquitetura do frontend, lacunas de teste e a vulnerabilidade de segurança do JWT."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-11-06T20:25:00Z"
+waiver: { active: false }
+top_issues:
+  - id: "SEC-001"
+    severity: high
+    finding: "O token JWT é armazenado no localStorage, o que é vulnerável a ataques XSS."
+    suggested_action: "Mover o armazenamento de token para cookies HttpOnly."
+  - id: "ARCH-002"
+    severity: medium
+    finding: "O frontend foi implementado com HTML/CSS/JavaScript puro, desalinhado com a arquitetura SPA definida."
+    suggested_action: "Incluir este componente no plano de migração para React para alinhar com os objetivos de longo prazo."
+  - id: "TEST-004"
+    severity: medium
+    finding: "Faltam testes de componente para o fluxo de gerenciamento de membros da equipe no frontend."
+    suggested_action: "Adicionar testes de frontend para o componente ProjectMembers."
+  - id: "TEST-005"
+    severity: low
+    finding: "Não há testes que verifiquem o registro de alterações da equipe no histórico de atividades (AC 5)."
+    suggested_action: "Adicionar um caso de teste para a funcionalidade de histórico de atividades."

@@ -1,0 +1,21 @@
+schema: 1
+story: "1.2"
+story_title: "Gestão de Perfis de Usuário e Permissões Básicas"
+gate: "FAIL"
+status_reason: "A história está incompleta. A interface de frontend não foi implementada e há lacunas nos testes do backend."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-11-06T20:10:00Z"
+waiver: { active: false }
+top_issues:
+  - id: "FE-001"
+    severity: high
+    finding: "A interface de frontend para gerenciamento de usuários está completamente ausente."
+    suggested_action: "Implementar a interface de frontend conforme especificado na história."
+  - id: "TEST-002"
+    severity: medium
+    finding: "Faltam testes de integração para o fluxo de gerenciamento de usuários."
+    suggested_action: "Adicionar testes de integração que cubram o CRUD de usuários e as regras de autorização."
+  - id: "BE-001"
+    severity: medium
+    finding: "A funcionalidade de histórico de atividades (AC 6) não foi implementada."
+    suggested_action: "Implementar a lógica para registrar as alterações de perfil no histórico de atividades."

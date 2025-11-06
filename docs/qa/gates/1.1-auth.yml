@@ -1,0 +1,21 @@
+schema: 1
+story: "1.1"
+story_title: "Configuração Inicial do Projeto e Autenticação de Usuários"
+gate: "CONCERNS"
+status_reason: "A funcionalidade atende aos critérios de aceitação, mas o frontend desvia da arquitetura definida e apresenta uma vulnerabilidade de segurança (uso de localStorage para JWT)."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-11-06T20:05:00Z"
+waiver: { active: false }
+top_issues:
+  - id: "SEC-001"
+    severity: high
+    finding: "O token JWT é armazenado no localStorage, o que é vulnerável a ataques XSS."
+    suggested_action: "Mover o armazenamento de token para cookies HttpOnly."
+  - id: "ARCH-001"
+    severity: medium
+    finding: "O frontend não segue a arquitetura SPA com React definida."
+    suggested_action: "Planejar uma migração gradual para a arquitetura definida."
+  - id: "TEST-001"
+    severity: medium
+    finding: "Falta de testes de frontend."
+    suggested_action: "Introduzir um framework de testes e criar testes para os fluxos de autenticação."

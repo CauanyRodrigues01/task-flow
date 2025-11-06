@@ -1,0 +1,21 @@
+schema: 1
+story: "1.3"
+story_title: "Criação e Gestão de Projetos pelo Gerente de Projeto"
+gate: "CONCERNS"
+status_reason: "A funcionalidade principal do backend foi entregue. O frontend foi implementado com uma abordagem pragmática devido a dificuldades técnicas, mas isso introduz débito técnico. Há também lacunas de teste e uma vulnerabilidade de segurança."
+reviewer: "Quinn (Test Architect)"
+updated: "2025-11-06T20:20:00Z"
+waiver: { active: false }
+top_issues:
+  - id: "SEC-001"
+    severity: high
+    finding: "O token JWT é armazenado no localStorage, o que é vulnerável a ataques XSS."
+    suggested_action: "Mover o armazenamento de token para cookies HttpOnly."
+  - id: "ARCH-002"
+    severity: medium
+    finding: "O frontend foi implementado com HTML/CSS/JavaScript puro devido a dificuldades técnicas com a configuração do ambiente Vite/React."
+    suggested_action: "Documentar a arquitetura atual do frontend e criar um plano para uma futura migração para React quando for viável, para alinhar com os objetivos de longo prazo do projeto."
+  - id: "TEST-003"
+    severity: medium
+    finding: "Faltam testes para a funcionalidade de histórico de atividades (AC 4)."
+    suggested_action: "Adicionar testes de integração para garantir que as operações de CRUD de projetos sejam registradas no histórico."

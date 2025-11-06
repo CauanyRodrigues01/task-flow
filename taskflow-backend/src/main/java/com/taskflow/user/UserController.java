@@ -51,6 +51,14 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/by-email/{email}")
+    @PreAuthorize("hasAnyRole('PROJECT_MANAGER', 'ADMIN')")
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+        return userService.findUserByEmail(email)
+                .map(user -> ResponseEntity.ok(convertToDto(user)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     private UserResponse convertToDto(User user) {
         return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getRole());
     }

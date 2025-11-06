@@ -37,3 +37,7 @@ build/
 *.sql
 *.sqlite
 *.db
+
+# Local guide projects (ignore entire folders)
+guia-frontend/
+guia-backend/

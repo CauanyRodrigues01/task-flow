@@ -182,4 +182,37 @@ class ProjectControllerIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized()); // Ou isForbidden() dependendo da sua config
     }
+
+    @Test
+    @WithUserDetails("pm@example.com")
+    void addMemberToProject_shouldReturnOk() throws Exception {
+        doNothing().when(projectService).addMember(anyLong(), anyLong());
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/members", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("2"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("pm@example.com")
+    void removeMemberFromProject_shouldReturnOk() throws Exception {
+        doNothing().when(projectService).removeMember(anyLong(), anyLong());
+
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/members/{userId}", 1L, 2L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithUserDetails("pm@example.com")
+    void getProjectMembers_shouldReturnListOfMembers() throws Exception {
+        User member = User.builder().id(2L).name("Test Member").email("member@example.com").role(Role.COLLABORATOR).build();
+        when(projectService.getProjectMembers(anyLong())).thenReturn(java.util.Collections.singleton(member));
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/members", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value(member.getName()));
+    }
 }

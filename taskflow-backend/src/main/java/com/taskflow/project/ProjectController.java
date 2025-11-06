@@ -66,6 +66,23 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{projectId}/members")
+    public ResponseEntity<java.util.Set<com.taskflow.user.User>> getProjectMembers(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectService.getProjectMembers(projectId));
+    }
+
+    @PostMapping("/{projectId}/members")
+    public ResponseEntity<Void> addMemberToProject(@PathVariable Long projectId, @RequestBody Long userId) {
+        projectService.addMember(projectId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{projectId}/members/{userId}")
+    public ResponseEntity<Void> removeMemberFromProject(@PathVariable Long projectId, @PathVariable Long userId) {
+        projectService.removeMember(projectId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     private ProjectResponse convertToDto(Project project) {
         return ProjectResponse.builder()
                 .id(project.getId())
