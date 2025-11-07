@@ -23,15 +23,15 @@ public class ProjectController {
 
     @PostMapping
     public ResponseEntity<ProjectResponse> createProject(@Valid @RequestBody ProjectRequest projectRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+        // Temporarily hardcoded owner ID as security is disabled for debugging
+        Long ownerId = 1L;
 
         Project project = Project.builder()
                 .name(projectRequest.getName())
                 .description(projectRequest.getDescription())
                 .build();
 
-        Project createdProject = projectService.createProject(project, currentUser.getId());
+        Project createdProject = projectService.createProject(project, ownerId);
         return new ResponseEntity<>(convertToDto(createdProject), HttpStatus.CREATED);
     }
 

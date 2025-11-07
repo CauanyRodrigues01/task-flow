@@ -13,11 +13,11 @@ public class CorsGlobalConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Aplica a todos os endpoints
-                        .allowedOrigins("http://127.0.0.1:5500", "null") // Permite o servidor de dev e acesso via file://
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
-                        .allowedHeaders("*") // Todos os cabeçalhos
-                        .allowCredentials(true); // Permite credenciais
+                registry.addMapping("/**")
+                        .allowedOriginPatterns("*") // Permite todas as origens
+                        .allowedMethods("*") // Permite todos os métodos
+                        .allowedHeaders("*") // Permite todos os cabeçalhos
+                        .allowCredentials(true);
             }
         };
     }

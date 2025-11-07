@@ -1,3 +1,4 @@
+(() => {
 const { useState, useEffect } = React;
 const e = React.createElement;
 
@@ -58,3 +59,4 @@ const UserProfilePreview = () => {
 
 // Expose globally for use in other scripts
 window.UserProfilePreview = UserProfilePreview;
+})();

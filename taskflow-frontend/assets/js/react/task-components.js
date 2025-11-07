@@ -1,3 +1,4 @@
+(() => {
 const { useState, useEffect } = React;
 
 const e = React.createElement;
@@ -505,3 +506,4 @@ document.addEventListener('DOMContentLoaded', () => {
         createTaskRoot.render(e(CreateTaskPage));
     }
 });
+})();

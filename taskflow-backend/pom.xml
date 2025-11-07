@@ -109,29 +109,20 @@
             <version>2.5.0</version>
         </dependency>
 
+        <dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
         <!-- Banco em memória para testes -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>com.mysql</groupId>
-                    <artifactId>mysql-connector-j</artifactId>
-                    <scope>runtime</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+
 
     <build>
         <plugins>
