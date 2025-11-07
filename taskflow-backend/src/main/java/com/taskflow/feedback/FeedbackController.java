@@ -2,8 +2,10 @@ package com.taskflow.feedback;
 
 import com.taskflow.feedback.dto.FeedbackRequestDto;
 import com.taskflow.user.User;
+import com.taskflow.user.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,12 +22,19 @@ public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> submitFeedback(
             @Valid @RequestBody FeedbackRequestDto feedbackRequestDto,
-            @AuthenticationPrincipal User currentUser) {
+            @AuthenticationPrincipal(expression = "username") String email) {
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         feedbackService.saveFeedback(feedbackRequestDto, currentUser);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

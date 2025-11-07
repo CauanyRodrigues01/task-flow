@@ -1,7 +1,6 @@
 package com.taskflow.task;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.taskflow.TestDatabaseConfig;
 import com.taskflow.activityhistory.ActivityHistory;
 import com.taskflow.activityhistory.ActivityHistoryRepository;
 import com.taskflow.project.Project;
@@ -33,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@Import(TestDatabaseConfig.class)
 class TaskControllerIntegrationTest {
 
     @Autowired

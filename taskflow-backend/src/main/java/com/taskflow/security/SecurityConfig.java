@@ -2,6 +2,7 @@ package com.taskflow.security;
 
 import com.taskflow.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -29,6 +30,9 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final @Lazy JwtService jwtService;
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthFilter(@Lazy UserDetailsService userDetailsService) {
@@ -66,7 +70,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setUserDetailsService(customUserDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

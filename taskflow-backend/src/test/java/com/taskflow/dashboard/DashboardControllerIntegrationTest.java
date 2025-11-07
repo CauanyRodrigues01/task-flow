@@ -1,7 +1,6 @@
 package com.taskflow.dashboard;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.taskflow.TestDatabaseConfig;
 import com.taskflow.project.Project;
 import com.taskflow.project.ProjectRepository;
 import com.taskflow.task.Task;
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;

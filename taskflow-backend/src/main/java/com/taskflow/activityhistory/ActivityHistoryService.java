@@ -1,5 +1,6 @@
 package com.taskflow.activityhistory;
 
+import com.taskflow.activityhistory.dto.ActivityHistoryResponse;
 import com.taskflow.task.Task;
 import com.taskflow.task.TaskRepository;
 import com.taskflow.user.User;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +37,19 @@ public class ActivityHistoryService {
                 .build();
 
         activityHistoryRepository.save(history);
+    }
+
+    public List<ActivityHistoryResponse> getTaskHistory(Long taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + taskId));
+
+        return activityHistoryRepository.findByTaskIdOrderByCreatedAtDesc(taskId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private ActivityHistoryResponse convertToDto(ActivityHistory history) {
+        Long userId = (history.getUser() != null) ? history.getUser().getId() : null;
+        return new ActivityHistoryResponse(history.getId(), history.getTask().getId(), userId, history.getDescription(), history.getCreatedAt());
     }
 }

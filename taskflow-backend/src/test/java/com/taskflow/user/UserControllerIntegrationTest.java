@@ -43,7 +43,7 @@ class UserControllerIntegrationTest {
     @Test
     @WithMockUser(username = "admin.user@example.com", roles = {"ADMIN"})
     void getAllUsers_shouldReturnListOfUsers() throws Exception {
-        mockMvc.perform(get("/api/v1/users")
+        mockMvc.perform(get("/api/users")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
@@ -52,7 +52,7 @@ class UserControllerIntegrationTest {
     @Test
     @WithMockUser(username = "collab.user@example.com", roles = {"COLLABORATOR"})
     void getAllUsers_whenNotAdmin_shouldReturnForbidden() throws Exception {
-        mockMvc.perform(get("/api/v1/users")
+        mockMvc.perform(get("/api/users")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
@@ -60,7 +60,7 @@ class UserControllerIntegrationTest {
     @Test
     @WithMockUser(username = "admin.user@example.com", roles = {"ADMIN"})
     void updateUserRole_shouldChangeUserRole() throws Exception {
-        mockMvc.perform(put("/api/v1/users/{userId}/role", collaborator.getId())
+        mockMvc.perform(put("/api/users/{userId}/role", collaborator.getId())
                         .param("newRole", "MANAGER"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role").value("MANAGER"));
@@ -69,7 +69,7 @@ class UserControllerIntegrationTest {
     @Test
     @WithMockUser(username = "admin.user@example.com", roles = {"ADMIN"})
     void deleteUser_shouldRemoveUser() throws Exception {
-        mockMvc.perform(delete("/api/v1/users/{userId}", collaborator.getId())
+        mockMvc.perform(delete("/api/users/{userId}", collaborator.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }

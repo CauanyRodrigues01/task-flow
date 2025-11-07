@@ -1,23 +1,25 @@
 package com.taskflow.activityhistory;
 
-import com.taskflow.project.Project;
-import com.taskflow.project.ProjectRepository;
+import com.taskflow.activityhistory.dto.ActivityHistoryResponse;
 import com.taskflow.task.Task;
-import com.taskflow.task.TaskRepository;
-import com.taskflow.user.User;
-import com.taskflow.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -29,44 +31,24 @@ class ActivityHistoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    @MockBean
+    private ActivityHistoryService activityHistoryService;
 
     @Test
-    @WithMockUser(username = "test@example.com")
+    @WithMockUser(username = "test@example.com", roles = {"ADMIN"})
     void getTaskHistory_shouldReturnOk() throws Exception {
         // Given
-        User user = userRepository.save(
-                User.builder()
-                        .email("test@example.com")
-                        .passwordHash("password")
-                        .name("Test User")
-                        .build()
+        Long taskId = 1L;
+        List<ActivityHistoryResponse> mockHistory = Arrays.asList(
+                new ActivityHistoryResponse(1L, taskId, 1L, "User created task", LocalDateTime.now()),
+                new ActivityHistoryResponse(2L, taskId, 1L, "Task status changed to IN_PROGRESS", LocalDateTime.now())
         );
-
-        Project project = projectRepository.save(
-                Project.builder()
-                        .name("Test Project")
-                        .owner(user)
-                        .members(Set.of(user))
-                        .build()
-        );
-
-        Task task = taskRepository.save(
-                Task.builder()
-                        .title("Test Task")
-                        .project(project)
-                        .build()
-        );
+        when(activityHistoryService.getTaskHistory(anyLong())).thenReturn(mockHistory);
 
         // When & Then
-        mockMvc.perform(get("/tasks/{taskId}/history", task.getId()))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/tasks/{taskId}/history", taskId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(mockHistory.size()))
+                .andExpect(jsonPath("$[0].description").value("User created task"));
     }
 }

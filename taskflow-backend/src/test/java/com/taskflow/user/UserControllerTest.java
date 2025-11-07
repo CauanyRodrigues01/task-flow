@@ -1,6 +1,7 @@
 package com.taskflow.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.taskflow.security.CustomUserDetailsService;
 import com.taskflow.security.JwtService;
 import com.taskflow.security.SecurityConfig;
 import com.taskflow.user.dto.UserCreationRequest;
@@ -28,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.context.annotation.Import;
 
 @WebMvcTest(UserController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, CustomUserDetailsService.class})
 public class UserControllerTest {
 
     @Autowired
