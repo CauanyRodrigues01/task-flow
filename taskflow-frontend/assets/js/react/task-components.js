@@ -296,6 +296,36 @@ const TaskFilters = ({ onApplyFilters }) => {
     );
 };
 
+const ContextNoteModal = ({ task, newStatus, onSave, onCancel }) => {
+    const [contextNote, setContextNote] = useState('');
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        onSave(contextNote);
+    };
+
+    return e('div', { className: 'modal-overlay' },
+        e('div', { className: 'modal-content' },
+            e('h3', null, `Adicionar Nota para "${task.title}" (Status: ${newStatus})`),
+            e('form', { onSubmit: handleSubmit },
+                e('div', { className: 'form-group' },
+                    e('label', { htmlFor: 'contextNote' }, 'Nota Rápida (Opcional):'),
+                    e('textarea', {
+                        id: 'contextNote',
+                        value: contextNote,
+                        onChange: (ev) => setContextNote(ev.target.value),
+                        rows: 4,
+                        placeholder: 'Ex: "Iniciei a implementação da API." ou "Aguardando feedback do UX."'})
+                ),
+                e('div', { className: 'modal-actions' },
+                    e('button', { type: 'submit', className: 'btn' }, 'Salvar'),
+                    e('button', { type: 'button', className: 'btn btn-secondary', onClick: onCancel }, 'Cancelar')
+                )
+            )
+        )
+    );
+};
+
 // Componente principal para gerenciamento de tarefas (agora inclui filtros, lista e Kanban)
 const TaskManagementPage = () => {
     const [tasks, setTasks] = useState([]);
@@ -303,6 +333,11 @@ const TaskManagementPage = () => {
     const [error, setError] = useState(null);
     const [editingTask, setEditingTask] = useState(null);
     const [filters, setFilters] = useState({ status: '', assigneeId: '', priority: '', keyword: '' });
+
+    // New state for context note modal
+    const [showContextNoteModal, setShowContextNoteModal] = useState(false);
+    const [taskToUpdateStatus, setTaskToUpdateStatus] = useState(null);
+    const [newStatusForContext, setNewStatusForContext] = useState(null);
 
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('projectId');
@@ -343,17 +378,44 @@ const TaskManagementPage = () => {
         setTasks(tasks.filter(task => task.id !== deletedTaskId));
     };
 
-    const handleTaskStatusChange = async (taskId, newStatus) => {
+    // Modified handleTaskStatusChange to open modal
+    const handleTaskStatusChange = (taskId, newStatus) => {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+            setTaskToUpdateStatus(task);
+            setNewStatusForContext(newStatus);
+            setShowContextNoteModal(true);
+        }
+    };
+
+    // New function to save status change with context note
+    const handleSaveStatusChangeWithContext = async (contextNote) => {
+        if (!taskToUpdateStatus || !newStatusForContext) return;
+
         const originalTasks = [...tasks];
-        const updatedTasks = tasks.map(task => task.id === taskId ? { ...task, status: newStatus } : task);
+        const updatedTasks = tasks.map(task =>
+            task.id === taskToUpdateStatus.id ? { ...task, status: newStatusForContext } : task
+        );
         setTasks(updatedTasks);
+        setShowContextNoteModal(true); // Keep modal open until API call is done or error
 
         try {
-            await window.apiClient.patch(`/api/v1/projects/${projectId}/tasks/${taskId}`, { status: newStatus });
+            await window.apiClient.patch(
+                `/api/v1/projects/${projectId}/tasks/${taskToUpdateStatus.id}`,
+                { status: newStatusForContext, contextNote: contextNote }
+            );
+            window.notificationService.show('Status da tarefa atualizado com sucesso!');
+            setShowContextNoteModal(false);
+            setTaskToUpdateStatus(null);
+            setNewStatusForContext(null);
+            fetchTasks(); // Re-fetch tasks to get updated history
         } catch (err) {
             console.error('Erro ao atualizar status da tarefa:', err);
             setTasks(originalTasks); // Revert on error
             window.notificationService.show('Não foi possível atualizar o status da tarefa.', 'error');
+            setShowContextNoteModal(false);
+            setTaskToUpdateStatus(null);
+            setNewStatusForContext(null);
         }
     };
 
@@ -387,7 +449,19 @@ const TaskManagementPage = () => {
         ),
         e(TaskFilters, { onApplyFilters: handleApplyFilters }),
         e(TaskList, { tasks, onEdit: setEditingTask, onDelete: handleTaskDeleted }),
-        e(KanbanBoard, { tasks, onTaskStatusChange: handleTaskStatusChange })
+        e(KanbanBoard, { tasks, onTaskStatusChange: handleTaskStatusChange }), // Pass modified handler
+
+        // Render ContextNoteModal
+        showContextNoteModal && e(ContextNoteModal, {
+            task: taskToUpdateStatus,
+            newStatus: newStatusForContext,
+            onSave: handleSaveStatusChangeWithContext,
+            onCancel: () => {
+                setShowContextNoteModal(false);
+                setTaskToUpdateStatus(null);
+                setNewStatusForContext(null);
+            }
+        })
     );
 };
 

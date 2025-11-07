@@ -255,17 +255,49 @@ tbody tr:hover {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6); /* Darker overlay */
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000; /* Ensure it's on top */
 }
 
 .modal-content {
     background: var(--panel);
-    padding: 20px;
+    padding: 30px; /* More padding */
     border-radius: var(--radius);
-    min-width: 400px;
+    box-shadow: var(--shadow);
+    min-width: 450px; /* Slightly wider */
+    max-width: 90%;
+    position: relative;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .btn {
+    min-width: 100px; /* Consistent button width */
+}
+
+.modal-actions .btn-secondary {
+    background: var(--border); /* Use border color for secondary button */
+    color: var(--text-2);
+    border: 1px solid var(--muted);
+}
+
+.modal-actions .btn-secondary:hover {
+    background: var(--muted);
+    color: var(--text);
 }
 
 /* ------ Menu Principal ------ */
