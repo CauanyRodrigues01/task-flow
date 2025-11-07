@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class TaskStatusUpdateRequestDto {
     private TaskStatus status;
+    private String contextNote;
 }
