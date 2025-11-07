@@ -71,10 +71,6 @@ public class ProjectService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!"COLLABORATOR".equals(user.getRole())) {
-            throw new RuntimeException("Only users with COLLABORATOR role can be added to projects.");
-        }
-
         project.getMembers().add(user);
         projectRepository.save(project);
     }

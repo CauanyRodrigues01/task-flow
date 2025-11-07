@@ -16,6 +16,7 @@ public class TaskResponseDto {
     private LocalDateTime dueDate;
     private Long projectId;
     private Long assigneeId;
+    private String assigneeName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

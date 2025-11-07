@@ -7,5 +7,9 @@ import java.util.List;
 
 @Repository
 public interface ActivityHistoryRepository extends JpaRepository<ActivityHistory, Long> {
+<<<<<<< HEAD
     List<ActivityHistory> findByTaskIdOrderByCreatedAtDesc(Long taskId);
+=======
+    List<ActivityHistory> findByTaskIdOrderByCreatedAtAsc(Long taskId);
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
 }

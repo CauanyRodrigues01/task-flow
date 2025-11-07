@@ -3,9 +3,13 @@ package com.taskflow.notification;
 import com.taskflow.notification.dto.NotificationResponseDto;
 import com.taskflow.user.User;
 import com.taskflow.user.UserRepository;
+<<<<<<< HEAD
 import com.taskflow.user.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
+=======
+import lombok.RequiredArgsConstructor;
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +26,11 @@ public class NotificationService {
     @Transactional
     public NotificationResponseDto createNotification(Long userId, String message) {
         User user = userRepository.findById(userId)
+<<<<<<< HEAD
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+=======
+                .orElseThrow(() -> new RuntimeException("User not found"));
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
 
         Notification notification = Notification.builder()
                 .user(user)
@@ -31,6 +39,7 @@ public class NotificationService {
                 .build();
 
         Notification savedNotification = notificationRepository.save(notification);
+<<<<<<< HEAD
         return toDto(savedNotification);
     }
 
@@ -67,3 +76,36 @@ public class NotificationService {
                 .build();
     }
 }
+=======
+        return mapToNotificationResponseDto(savedNotification);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NotificationResponseDto> getNotificationsByUserId(Long userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return notifications.stream()
+                .map(this::mapToNotificationResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public NotificationResponseDto markNotificationAsRead(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+
+        notification.setReadStatus(true);
+        Notification updatedNotification = notificationRepository.save(notification);
+        return mapToNotificationResponseDto(updatedNotification);
+    }
+
+    private NotificationResponseDto mapToNotificationResponseDto(Notification notification) {
+        NotificationResponseDto dto = new NotificationResponseDto();
+        dto.setId(notification.getId());
+        dto.setUserId(notification.getUser().getId());
+        dto.setMessage(notification.getMessage());
+        dto.setReadStatus(notification.getReadStatus());
+        dto.setCreatedAt(notification.getCreatedAt());
+        return dto;
+    }
+}
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)

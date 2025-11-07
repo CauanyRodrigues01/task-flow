@@ -32,8 +32,12 @@ public class TaskService {
     private final ActivityHistoryService activityHistoryService;
 
     @Transactional
+<<<<<<< HEAD
     public TaskResponseDto createTask(Long projectId, TaskRequestDto taskRequestDto) {
         // ... (código existente)
+=======
+    public TaskResponseDto createTask(Long projectId, TaskRequestDto taskRequestDto, User currentUser) {
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -55,21 +59,30 @@ public class TaskService {
 
         Task savedTask = taskRepository.save(task);
 
+<<<<<<< HEAD
         if (assignee != null) {
             notificationService.createNotification(assignee.getId(), "Você foi atribuído à tarefa: " + savedTask.getTitle());
         }
 
         // Supondo que o usuário autenticado tem id 1L para fins de exemplo
         activityHistoryService.recordActivity(savedTask.getId(), 1L, "Tarefa '" + savedTask.getTitle() + "' foi criada.");
+=======
+        if (savedTask.getAssignee() != null) {
+            notificationService.createNotification(savedTask.getAssignee().getId(), "Você foi atribuído à tarefa: " + savedTask.getTitle());
+        }
+
+        activityHistoryService.recordActivity(savedTask.getId(), currentUser.getId(), "Tarefa criada: " + savedTask.getTitle());
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
 
         return mapToTaskResponseDto(savedTask);
     }
 
     @Transactional
-    public TaskResponseDto updateTask(Long taskId, TaskRequestDto taskRequestDto) {
-        Task task = taskRepository.findById(taskId)
+    public TaskResponseDto updateTask(Long taskId, TaskRequestDto taskRequestDto, User currentUser) {
+        Task oldTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
+<<<<<<< HEAD
         StringBuilder changes = new StringBuilder();
         // Lógica para registrar alterações detalhadas
         if (!Objects.equals(task.getTitle(), taskRequestDto.getTitle())) {
@@ -99,8 +112,22 @@ public class TaskService {
 
 
         User assignee = null;
+=======
+        // Create a copy of the old task to compare against later
+        Task task = oldTask; // Use oldTask as base for updates
+
+        User oldAssignee = task.getAssignee();
+        TaskStatus oldStatus = task.getStatus();
+        String oldTitle = task.getTitle();
+        String oldDescription = task.getDescription();
+        TaskPriority oldPriority = task.getPriority();
+        LocalDateTime oldDueDate = task.getDueDate();
+
+
+        User newAssignee = null;
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
         if (taskRequestDto.getAssigneeId() != null) {
-            assignee = userRepository.findById(taskRequestDto.getAssigneeId())
+            newAssignee = userRepository.findById(taskRequestDto.getAssigneeId())
                     .orElseThrow(() -> new RuntimeException("Assignee not found"));
         }
 
@@ -109,25 +136,64 @@ public class TaskService {
         task.setStatus(taskRequestDto.getStatus());
         task.setPriority(taskRequestDto.getPriority());
         task.setDueDate(taskRequestDto.getDueDate());
-        task.setAssignee(assignee);
+        task.setAssignee(newAssignee);
 
         Task updatedTask = taskRepository.save(task);
 
+<<<<<<< HEAD
         if (changes.length() > 0) {
             // Supondo que o usuário autenticado tem id 1L para fins de exemplo
             activityHistoryService.recordActivity(updatedTask.getId(), 1L, changes.toString().trim());
+=======
+        // Record activity for changes
+        if (!oldTitle.equals(updatedTask.getTitle())) {
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(),
+                    String.format("Título da tarefa alterado de '%s' para '%s'", oldTitle, updatedTask.getTitle()));
+        }
+        if (!oldDescription.equals(updatedTask.getDescription())) {
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(),
+                    String.format("Descrição da tarefa alterada de '%s' para '%s'", oldDescription, updatedTask.getDescription()));
+        }
+        if (!oldStatus.equals(updatedTask.getStatus())) {
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(),
+                    String.format("Status da tarefa alterado de '%s' para '%s'", oldStatus, updatedTask.getStatus()));
+            // Notification for status change is already in updateTaskStatus, but this is for history
+        }
+        if (!oldPriority.equals(updatedTask.getPriority())) {
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(),
+                    String.format("Prioridade da tarefa alterada de '%s' para '%s'", oldPriority, updatedTask.getPriority()));
+        }
+        if (!java.util.Objects.equals(oldDueDate, updatedTask.getDueDate())) {
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(),
+                    String.format("Data de vencimento da tarefa alterada de '%s' para '%s'", oldDueDate, updatedTask.getDueDate()));
+        }
+        if (!java.util.Objects.equals(oldAssignee, updatedTask.getAssignee())) {
+            String oldAssigneeName = (oldAssignee != null) ? oldAssignee.getName() : "Ninguém";
+            String newAssigneeName = (updatedTask.getAssignee() != null) ? updatedTask.getAssignee().getName() : "Ninguém";
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(),
+                    String.format("Responsável da tarefa alterado de '%s' para '%s'", oldAssigneeName, newAssigneeName));
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
         }
 
         return mapToTaskResponseDto(updatedTask);
     }
 
     @Transactional
+<<<<<<< HEAD
     public void deleteTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
         
         // Supondo que o usuário autenticado tem id 1L para fins de exemplo
         activityHistoryService.recordActivity(taskId, 1L, "Tarefa '" + task.getTitle() + "' foi excluída.");
+=======
+    public void deleteTask(Long taskId, User currentUser) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        activityHistoryService.recordActivity(taskId, currentUser.getId(), "Tarefa excluída: " + task.getTitle());
+
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
         taskRepository.deleteById(taskId);
     }
 
@@ -166,10 +232,11 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponseDto updateTaskStatus(Long taskId, TaskStatusUpdateRequestDto statusUpdateRequestDto) {
+    public TaskResponseDto updateTaskStatus(Long taskId, TaskStatusUpdateRequestDto statusUpdateRequestDto, User currentUser) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
+<<<<<<< HEAD
         TaskStatus oldStatus = task.getStatus();
         task.setStatus(statusUpdateRequestDto.getStatus());
         Task updatedTask = taskRepository.save(task);
@@ -185,6 +252,26 @@ public class TaskService {
         
         // Supondo que o usuário autenticado tem id 1L para fins de exemplo
         activityHistoryService.recordActivity(updatedTask.getId(), 1L, descriptionBuilder.toString());
+=======
+        TaskStatus oldStatus = task.getStatus(); // Get old status
+
+        task.setStatus(statusUpdateRequestDto.getStatus());
+        Task updatedTask = taskRepository.save(task);
+
+        if (!oldStatus.equals(updatedTask.getStatus())) {
+            // Notify Project Manager (project owner)
+            User projectOwner = updatedTask.getProject().getOwner();
+            notificationService.createNotification(projectOwner.getId(),
+                    "O status da tarefa '" + updatedTask.getTitle() + "' foi alterado de " + oldStatus + " para " + updatedTask.getStatus());
+
+            // Record activity for status change
+            String activityDescription = "Status da tarefa '" + updatedTask.getTitle() + "' alterado de " + oldStatus + " para " + updatedTask.getStatus();
+            if (statusUpdateRequestDto.getContextNote() != null && !statusUpdateRequestDto.getContextNote().isEmpty()) {
+                activityDescription += ". Nota: " + statusUpdateRequestDto.getContextNote();
+            }
+            activityHistoryService.recordActivity(updatedTask.getId(), currentUser.getId(), activityDescription);
+        }
+>>>>>>> b26b43c (fix: ajusta comunicação entre o backend-frontend)
 
         return mapToTaskResponseDto(updatedTask);
     }
@@ -213,6 +300,7 @@ public class TaskService {
         dto.setProjectId(task.getProject().getId());
         if (task.getAssignee() != null) {
             dto.setAssigneeId(task.getAssignee().getId());
+            dto.setAssigneeName(task.getAssignee().getName());
         }
         dto.setCreatedAt(task.getCreatedAt());
         dto.setUpdatedAt(task.getUpdatedAt());
