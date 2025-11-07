@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin: Gerenciar Usuários - TaskFlow</title>
+    <title>Configurações - TaskFlow</title>
     <link rel="stylesheet" href="assets/css/global.css">
 </head>
 <body>
     <header class="header-banner">
         <h1>Task Flow</h1>
-        <p>o caminho para a produtividade</p>
+        <p>Configurações do Usuário</p>
         <div class="hamburger-menu" id="hamburger-menu">
             <span></span>
             <span></span>
@@ -17,21 +17,44 @@
         </div>
     </header>
     <div class="dropdown-menu" id="dropdown-menu">
-        <a href="#">Configurações</a>
-        <a href="#">Perfil do usuário</a>
         <a href="index.html">Voltar ao Menu Principal</a>
         <a href="#" id="logout-button">Sair</a>
     </div>
+
     <div class="container">
-        <div id="root"></div>
+        <h1>Configurações</h1>
+
+        <section class="settings-section">
+            <h2>Aparência</h2>
+            <div class="setting-item">
+                <span>Modo Escuro</span>
+                <label class="switch">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </section>
+
+        <section class="settings-section">
+            <h2>Perfil do Usuário</h2>
+            <div id="user-profile-root"></div>
+        </section>
     </div>
 
+    <!-- Dependências Core -->
     <script src="assets/js/core/storage.js"></script>
     <script src="assets/js/core/apiClient.js"></script>
+    
+    <!-- React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="assets/js/react/admin-users-components.js"></script>
+
+    <!-- Serviços e Componentes -->
     <script src="assets/js/react/notification-service.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/react/user-profile-preview.js"></script>
+    
+    <!-- Lógica da Página -->
+    <script src="assets/js/pages/settings-page.js"></script>
+    <script src="assets/js/main.js"></script> 
 </body>
 </html>
