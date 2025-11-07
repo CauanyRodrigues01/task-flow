@@ -14,12 +14,24 @@
     <div class="container">
         <div id="root"></div>
     </div>
+    <div id="loading-spinner-root"></div>
+
     <script src="assets/js/core/storage.js"></script>
     <script src="assets/js/core/config.js"></script>
+    <script src="assets/js/core/loading-service.js"></script>
     <script src="assets/js/core/apiClient.js"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="assets/js/react/auth-components.js"></script>
+    <script src="assets/js/react/components/auth/LoginForm.js"></script>
+    <script src="assets/js/react/components/auth/RegisterForm.js"></script>
+    <script src="assets/js/react/components/auth/AuthPage.js"></script>
+    <script src="assets/js/react/components/common/LoadingSpinner.js"></script>
     <script src="assets/js/react/notification-service.js"></script>
+    <script>
+        const loadingSpinnerContainer = document.getElementById('loading-spinner-root');
+        if (loadingSpinnerContainer) {
+            ReactDOM.createRoot(loadingSpinnerContainer).render(e(LoadingSpinner));
+        }
+    </script>
 </body>
 </html>

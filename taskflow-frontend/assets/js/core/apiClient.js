@@ -15,11 +15,13 @@
     };
 
     async function refreshToken() {
+        window.loadingService.show();
         isRefreshing = true;
         const refreshToken = window.storage.getRefreshToken();
         if (!refreshToken) {
             window.storage.clearTokens();
             window.location.href = 'auth.html';
+            window.loadingService.hide();
             return Promise.reject(new Error('No refresh token available'));
         }
 
@@ -45,10 +47,12 @@
             return Promise.reject(error);
         } finally {
             isRefreshing = false;
+            window.loadingService.hide();
         }
     }
 
     async function request(method, path, body) {
+        window.loadingService.show();
         const url = `${baseURL}${path}`;
         const init = {
             method,
@@ -75,12 +79,16 @@
                         }).then(newToken => {
                             init.headers['Authorization'] = `Bearer ${newToken}`;
                             return fetch(url, init); // Retry the original request
+                        }).finally(() => {
+                            window.loadingService.hide();
                         });
                     }
 
                     return refreshToken().then(newAccessToken => {
                         init.headers['Authorization'] = `Bearer ${newAccessToken}`;
                         return fetch(url, init); // Retry the original request
+                    }).finally(() => {
+                        window.loadingService.hide();
                     });
                 }
 
@@ -105,6 +113,8 @@
         } catch (err) {
             console.error('API Error:', { url, method, body, error: err });
             throw err;
+        } finally {
+            window.loadingService.hide();
         }
     }
 

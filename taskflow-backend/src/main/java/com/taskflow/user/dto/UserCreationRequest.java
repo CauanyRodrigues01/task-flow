@@ -4,6 +4,7 @@ import com.taskflow.user.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,16 +14,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserCreationRequest {
 
-    @NotBlank(message = "Name cannot be empty")
+    @NotBlank(message = "O nome não pode estar em branco")
+    @Size(min = 3, max = 100, message = "O nome deve ter entre 3 e 100 caracteres")
     private String name;
 
-    @NotBlank(message = "Email cannot be empty")
-    @Email(message = "Email should be valid")
+    @NotBlank(message = "O email não pode estar em branco")
+    @Email(message = "Formato de email inválido")
     private String email;
 
-    @NotBlank(message = "Password cannot be empty")
+    @NotBlank(message = "A senha não pode estar em branco")
+    @Size(min = 8, message = "A senha deve ter pelo menos 8 caracteres")
     private String password;
 
-    @NotNull(message = "Role cannot be null")
+    @NotNull(message = "A role não pode ser nula")
     private Role role;
 }

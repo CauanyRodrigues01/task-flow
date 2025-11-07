@@ -116,4 +116,21 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void deveRetornarBadRequestParaRegistroComDadosInvalidos() throws Exception {
+        RegistroRequest request = RegistroRequest.builder()
+                .name("No") // Nome muito curto
+                .email("emailinvalido") // Email mal formatado
+                .password("123") // Senha muito curta
+                .build();
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.name").value("O nome deve ter entre 3 e 100 caracteres"))
+                .andExpect(jsonPath("$.email").value("Formato de email inválido"))
+                .andExpect(jsonPath("$.password").value("A senha deve ter pelo menos 8 caracteres"));
+    }
 }

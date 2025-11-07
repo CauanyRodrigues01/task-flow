@@ -33,16 +33,25 @@
 
     <div id="profile-preview-root" class="modal-overlay" style="display: none;"></div>
     <div id="feedback-root"></div>
+    <div id="loading-spinner-root"></div>
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="assets/js/core/storage.js"></script>
     <script src="assets/js/core/config.js"></script>
+    <script src="assets/js/core/loading-service.js"></script>
     <script src="assets/js/core/apiClient.js"></script>
     <script src="assets/js/react/notification-service.js"></script>
+    <script src="assets/js/react/components/common/LoadingSpinner.js"></script>
     <script src="assets/js/react/project-components.js"></script>
     <script src="assets/js/react/task-components.js"></script>
     <script src="assets/js/react/user-profile-preview.js"></script>
     <script src="assets/js/main.js"></script>
+    <script>
+        const loadingSpinnerContainer = document.getElementById('loading-spinner-root');
+        if (loadingSpinnerContainer) {
+            ReactDOM.createRoot(loadingSpinnerContainer).render(e(LoadingSpinner));
+        }
+    </script>
 </body>
 </html>
