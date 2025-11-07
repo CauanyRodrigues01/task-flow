@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Projetos - TaskFlow</title>
+    <title>Tarefas do Projeto - TaskFlow</title>
     <link rel="stylesheet" href="assets/css/global.css">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body>
     <header class="header-banner">
         <h1>Task Flow</h1>
-        <p>o caminho para a produtividade</p>
+        <p>Visualizador de Tarefas</p>
         <div class="hamburger-menu" id="hamburger-menu">
             <span></span>
             <span></span>
@@ -18,28 +19,34 @@
     </header>
     <div class="dropdown-menu" id="dropdown-menu">
         <a href="settings.html">Configurações</a>
-        <a href="index.html">Voltar ao Menu Principal</a>
+        <a href="projects.html">Voltar aos Projetos</a>
         <a href="#" id="logout-button">Sair</a>
     </div>
     <div class="container">
-        <div id="root"></div> <!-- Para componentes de projeto -->
-        <div id="task-root"></div> <!-- Para formulários de tarefa (edição/criação) -->
-        <div id="filter-root"></div> <!-- Novo: Para componentes de filtro -->
-        <div id="task-list-root"></div> <!-- Para a visualização em lista -->
-        <div id="kanban-root"></div> <!-- Novo: Para o quadro Kanban -->
+        <div id="task-carousel-root"></div> <!-- O carrossel será renderizado aqui -->
     </div>
 
     <div id="profile-preview-root" class="modal-overlay" style="display: none;"></div>
     <div id="feedback-root"></div>
 
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Dependências Core -->
     <script src="assets/js/core/storage.js"></script>
     <script src="assets/js/core/apiClient.js"></script>
+    
+    <!-- Material Tailwind JS -->
+    <script src="https://unpkg.com/@material-tailwind/react@latest/dist/material-tailwind-react.min.js"></script>
+
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Serviços e Componentes -->
     <script src="assets/js/react/notification-service.js"></script>
-    <script src="assets/js/react/project-components.js"></script>
-    <script src="assets/js/react/task-components.js"></script>
+    <script src="assets/js/react/carousel-components.js"></script>
     <script src="assets/js/react/user-profile-preview.js"></script>
-    <script src="assets/js/main.js"></script>
+    
+    <!-- Lógica da Página -->
+    <script src="assets/js/pages/tasks-page.js"></script>
+    <script src="assets/js/main.js"></script> 
 </body>
 </html>

@@ -1,0 +1,104 @@
+.my-focus-page {
+    padding: 20px;
+}
+
+.my-focus-page h2 {
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+.sort-options {
+    background-color: var(--panel);
+    padding: 15px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-options label {
+    font-weight: 600;
+    color: var(--text-2);
+}
+
+.sort-options select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+}
+
+.my-focus-task-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.my-focus-task-card {
+    background-color: var(--panel);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.my-focus-task-card h3 {
+    margin: 0;
+    color: var(--brand);
+    font-size: 1.5rem;
+}
+
+.my-focus-task-card .task-description {
+    color: var(--text-2);
+    font-size: 0.95rem;
+    flex-grow: 1;
+}
+
+.my-focus-task-card .task-meta span {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.my-focus-task-card .task-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.my-focus-task-card .task-actions select,
+.my-focus-task-card .task-actions button {
+    flex: 1;
+}
+
+.comment-input-section {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment-input-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.comment-input-section button {
+    align-self: flex-end;
+    width: auto;
+    padding: 8px 15px;
+}
