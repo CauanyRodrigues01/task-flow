@@ -90,7 +90,7 @@ public class UserControllerTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void inviteUser_shouldReturnCreatedUser() throws Exception {
-        when(userService.inviteUser(any(UserCreationRequest.class))).thenReturn(collaboratorUser);
+        when(userService.criarUsuario(any(UserCreationRequest.class))).thenReturn(collaboratorUser);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)

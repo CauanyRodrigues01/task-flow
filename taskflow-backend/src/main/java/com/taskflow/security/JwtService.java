@@ -24,6 +24,9 @@ public class JwtService {
     @Value("${application.security.jwt.expiration}")
     private long jwtExpiration;
 
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private long refreshTokenExpiration;
+
     private SecretKey getSignInKey() {
         // converte a chave para o formato aceito pelo algoritmo HS256
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
@@ -47,6 +50,10 @@ public class JwtService {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, refreshTokenExpiration);
+    }
+
     private String buildToken(Map<String, Object> extraClaims,
                               UserDetails userDetails,
                               long expiration) {
@@ -68,7 +75,7 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 

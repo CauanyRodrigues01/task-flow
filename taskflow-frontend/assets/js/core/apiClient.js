@@ -1,17 +1,61 @@
 (() => {
-    // Define a URL base para a API do backend.
-    const baseURL = "http://localhost:8080";
+    const baseURL = window.config.API_BASE_URL;
+    let isRefreshing = false;
+    let failedQueue = [];
+
+    const processQueue = (error, token = null) => {
+        failedQueue.forEach(prom => {
+            if (error) {
+                prom.reject(error);
+            } else {
+                prom.resolve(token);
+            }
+        });
+        failedQueue = [];
+    };
+
+    async function refreshToken() {
+        isRefreshing = true;
+        const refreshToken = window.storage.getRefreshToken();
+        if (!refreshToken) {
+            window.storage.clearTokens();
+            window.location.href = 'auth.html';
+            return Promise.reject(new Error('No refresh token available'));
+        }
+
+        try {
+            const response = await fetch(`${baseURL}/api/v1/auth/refresh-token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to refresh token');
+            }
+
+            const data = await response.json();
+            window.storage.saveAccessToken(data.accessToken);
+            processQueue(null, data.accessToken);
+            return data.accessToken;
+        } catch (error) {
+            window.storage.clearTokens();
+            window.location.href = 'auth.html';
+            processQueue(error, null);
+            return Promise.reject(error);
+        } finally {
+            isRefreshing = false;
+        }
+    }
 
     async function request(method, path, body) {
         const url = `${baseURL}${path}`;
-        const init = { 
+        const init = {
             method,
-            headers: { 
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' },
         };
 
-        const token = window.storage ? window.storage.getToken() : null;
+        const token = window.storage ? window.storage.getAccessToken() : null;
         if (token) {
             init.headers['Authorization'] = `Bearer ${token}`;
         }
@@ -22,10 +66,26 @@
 
         try {
             const response = await fetch(url, init);
-            const contentType = response.headers.get("content-type");
 
             if (!response.ok) {
+                if ((response.status === 401 || response.status === 403) && !url.includes('/api/v1/auth')) {
+                    if (isRefreshing) {
+                        return new Promise((resolve, reject) => {
+                            failedQueue.push({ resolve, reject });
+                        }).then(newToken => {
+                            init.headers['Authorization'] = `Bearer ${newToken}`;
+                            return fetch(url, init); // Retry the original request
+                        });
+                    }
+
+                    return refreshToken().then(newAccessToken => {
+                        init.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                        return fetch(url, init); // Retry the original request
+                    });
+                }
+
                 let errorMessage = `HTTP error! status: ${response.status}`;
+                const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("application/json") !== -1) {
                     const errorData = await response.json();
                     errorMessage = errorData.message || JSON.stringify(errorData);
@@ -34,13 +94,13 @@
                 }
                 throw new Error(errorMessage);
             }
-
-            // Handle empty JSON response
+            
+            const contentType = response.headers.get("content-type");
             if (contentType && contentType.indexOf("application/json") !== -1) {
-                 const text = await response.text();
-                 return text ? JSON.parse(text) : {}; // Return empty object for empty response
-            } 
-            return response.text(); // Return as text if not json
+                const text = await response.text();
+                return text ? JSON.parse(text) : {};
+            }
+            return response.text();
 
         } catch (err) {
             console.error('API Error:', { url, method, body, error: err });

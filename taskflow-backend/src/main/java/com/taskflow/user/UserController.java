@@ -33,7 +33,7 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> inviteUser(@Valid @RequestBody UserCreationRequest request) {
-        User newUser = userService.inviteUser(request);
+        User newUser = userService.criarUsuario(request);
         return new ResponseEntity<>(convertToDto(newUser), HttpStatus.CREATED);
     }
 

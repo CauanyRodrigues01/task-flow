@@ -11,7 +11,7 @@ const LoginForm = ({ onSwitchToRegister }) => {
         event.preventDefault();
         try {
             const data = await window.apiClient.post('/api/v1/auth/login', { email, password });
-            window.storage.setToken(data.token);
+            window.storage.saveTokens(data.accessToken, data.refreshToken);
             window.notificationService.show('Login bem-sucedido!');
             window.location.href = 'index.html';
         } catch (error) {
@@ -52,7 +52,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
         event.preventDefault();
         try {
             const data = await window.apiClient.post('/api/v1/auth/register', { name, email, password });
-            window.storage.setToken(data.token);
+            window.storage.saveTokens(data.accessToken, data.refreshToken);
             window.notificationService.show('Registro bem-sucedido!');
             window.location.href = 'index.html';
         } catch (error) {

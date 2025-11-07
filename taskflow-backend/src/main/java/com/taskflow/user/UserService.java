@@ -33,18 +33,20 @@ public class UserService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(Role.ADMIN) // Perfil padrão alterado para ADMIN para teste
+                .role(Role.COLLABORATOR)
                 .build();
         User savedUser = userRepository.save(usuario);
         var jwtToken = jwtService.generateToken(savedUser);
+        var refreshToken = jwtService.generateRefreshToken(savedUser);
         return AuthResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().name())
                 .build();
     }
 
-    public String autenticarUsuario(LoginRequest request) {
+    public AuthResponse autenticarUsuario(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -52,8 +54,15 @@ public class UserService {
                 )
         );
         var usuario = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado")); // Deveria ser tratado por AuthenticationManager
-        return jwtService.generateToken(usuario);
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+        var jwtToken = jwtService.generateToken(usuario);
+        var refreshToken = jwtService.generateRefreshToken(usuario);
+        return AuthResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .email(usuario.getEmail())
+                .role(usuario.getRole().name())
+                .build();
     }
 
     public Optional<User> findUserByEmail(String email) {
@@ -66,7 +75,7 @@ public class UserService {
     }
 
     @Transactional
-    public User inviteUser(UserCreationRequest request) {
+    public User criarUsuario(UserCreationRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailJaRegistradoException("Email já registrado: " + request.getEmail());
         }
@@ -94,6 +103,15 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado com ID: " + userId));
         user.setRole(newRole);
         return userRepository.save(user);
+    }
+
+    public Optional<String> refreshToken(String refreshToken) {
+        if (!jwtService.isTokenExpired(refreshToken)) {
+            String userEmail = jwtService.extractUsername(refreshToken);
+            return userRepository.findByEmail(userEmail)
+                    .map(jwtService::generateToken);
+        }
+        return Optional.empty();
     }
 }
 

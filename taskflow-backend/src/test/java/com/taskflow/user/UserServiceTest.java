@@ -81,7 +81,7 @@ public class UserServiceTest {
                 .build();
         when(userRepository.save(any(User.class))).thenReturn(newUserToReturn);
 
-        User newUser = userService.inviteUser(request);
+        User newUser = userService.criarUsuario(request);
 
         assertNotNull(newUser);
         assertEquals(request.getEmail(), newUser.getEmail());
@@ -94,7 +94,7 @@ public class UserServiceTest {
         UserCreationRequest request = new UserCreationRequest("Admin User", "admin@example.com", "password", Role.COLLABORATOR);
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(adminUser));
 
-        assertThrows(EmailJaRegistradoException.class, () -> userService.inviteUser(request));
+        assertThrows(EmailJaRegistradoException.class, () -> userService.criarUsuario(request));
         verify(userRepository, never()).save(any(User.class));
     }
 

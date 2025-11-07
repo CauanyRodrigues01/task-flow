@@ -6,10 +6,15 @@ A estrutura do projeto adota uma abordagem Polyrepo dentro de um único reposit�
 TaskFlow/
 ├── taskflow-backend/           # Aplicação Backend (Java/Spring Boot)
 │   ├── src/main/java/com/taskflow/
+│   │   ├── activityhistory/    # Módulo para histórico de atividades
+│   │   ├── comment/            # Módulo para comentários
+│   │   ├── config/             # Configurações globais (CORS, Swagger)
+│   │   ├── dashboard/          # Módulo para funcionalidades do dashboard
+│   │   ├── notification/       # Módulo para notificações
 │   │   ├── project/            # Módulo de funcionalidade para Projetos
+│   │   ├── security/           # Componentes de segurança transversais
 │   │   ├── task/               # Módulo de funcionalidade para Tarefas
 │   │   ├── user/               # Módulo de funcionalidade para Usuários
-│   │   ├── security/           # Componentes de segurança transversais
 │   │   └── ...
 │   ├── pom.xml
 │   └── .env.example
@@ -21,10 +26,6 @@ TaskFlow/
 │   │   └── ...
 │   ├── package.json
 │   └── .env.local.example
-├── shared/                     # Pacote de tipos compartilhados (TypeScript)
-│   ├── src/
-│   │   └── types/              # Interfaces TypeScript (User, Project, Task, etc.)
-│   └── package.json
 └── docs/
     └── architecture.md         # Este documento
 ```

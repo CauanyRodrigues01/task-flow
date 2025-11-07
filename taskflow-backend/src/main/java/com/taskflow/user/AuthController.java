@@ -3,6 +3,8 @@ package com.taskflow.user;
 import com.taskflow.user.dto.AuthResponse;
 import com.taskflow.user.dto.LoginRequest;
 import com.taskflow.user.dto.RegistroRequest;
+import com.taskflow.user.dto.RefreshTokenRequest;
+import com.taskflow.user.dto.RefreshTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +25,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        String jwt = userService.autenticarUsuario(request);
-        User usuario = userService.findUserByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado após autenticação"));
-        return ResponseEntity.ok(AuthResponse.builder()
-                .token(jwt)
-                .email(usuario.getEmail())
-                .role(usuario.getRole().name())
-                .build());
+        return ResponseEntity.ok(userService.autenticarUsuario(request));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<RefreshTokenResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+        return userService.refreshToken(request.getRefreshToken())
+                .map(newAccessToken -> ResponseEntity.ok(new RefreshTokenResponse(newAccessToken)))
+                .orElse(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
     }
 
     @ExceptionHandler(EmailJaRegistradoException.class)
