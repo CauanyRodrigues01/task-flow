@@ -435,36 +435,36 @@ const TaskManagementPage = () => {
         return e('div', null, e('h2', null, error));
     }
 
-    return e('div', { className: 'container task-views' },
-        editingTask && e('div', { className: 'modal-overlay' },
-            e('div', { className: 'modal-content' },
-                e(TaskForm, { 
-                    projectId: parseInt(projectId), 
-                    initialData: editingTask, 
-                    isEditing: true, 
-                    onTaskCreated: handleTaskUpdated
-                }),
-                e('button', { className: 'btn', onClick: () => setEditingTask(null) }, 'Cancelar')
-            )
-        ),
-        e(TaskFilters, { onApplyFilters: handleApplyFilters }),
-        e(TaskList, { tasks, onEdit: setEditingTask, onDelete: handleTaskDeleted }),
-        e(KanbanBoard, { tasks, onTaskStatusChange: handleTaskStatusChange }), // Pass modified handler
-
-        // Render ContextNoteModal
-        showContextNoteModal && e(ContextNoteModal, {
-            task: taskToUpdateStatus,
-            newStatus: newStatusForContext,
-            onSave: handleSaveStatusChangeWithContext,
-            onCancel: () => {
-                setShowContextNoteModal(false);
-                setTaskToUpdateStatus(null);
-                setNewStatusForContext(null);
-            }
-        })
-    );
-};
-
+        return e('div', { className: 'container task-views' },
+            editingTask && e('div', { className: 'modal-overlay' },
+                e('div', { className: 'modal-content' },
+                    e(TaskForm, {
+                        projectId: parseInt(projectId),
+                        initialData: editingTask,
+                        isEditing: true,
+                        onTaskCreated: handleTaskUpdated
+                    }),
+                    e('button', { className: 'btn', onClick: () => setEditingTask(null) }, 'Cancelar')
+                )
+            ),
+            e(TaskFilters, { onApplyFilters: handleApplyFilters }),
+            e('button', { onClick: handleExportCsv, className: 'btn' }, 'Exportar para CSV'), // Export button
+            e(TaskList, { tasks, onEdit: setEditingTask, onDelete: handleTaskDeleted }),
+            e(KanbanBoard, { tasks, onTaskStatusChange: handleTaskStatusChange }), // Pass modified handler
+    
+            // Render ContextNoteModal
+            showContextNoteModal && e(ContextNoteModal, {
+                task: taskToUpdateStatus,
+                newStatus: newStatusForContext,
+                onSave: handleSaveStatusChangeWithContext,
+                onCancel: () => {
+                    setShowContextNoteModal(false);
+                    setTaskToUpdateStatus(null);
+                    setNewStatusForContext(null);
+                }
+            })
+        );
+    };
 // Componente para a página de criação de tarefa (reintroduzido)
 const CreateTaskPage = () => {
     const urlParams = new URLSearchParams(window.location.search);

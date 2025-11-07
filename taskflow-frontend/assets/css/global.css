@@ -713,3 +713,23 @@ input:checked + .slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
+.feedback-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    padding: 10px 15px;
+    border-radius: 50px; /* Pill shape */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-size: 1rem;
+    background-color: var(--brand);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.feedback-button:hover {
+    background-color: var(--brand-2);
+}

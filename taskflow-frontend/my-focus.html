@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Meu Foco</title>
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/my-focus.css"> <!-- New CSS for my-focus -->
+</head>
+<body>
+    <header class="header-banner">
+        <h1>TaskFlow</h1>
+        <p>Gerenciamento de Tarefas Simplificado</p>
+        <div class="hamburger-menu" id="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <nav class="dropdown-menu" id="dropdown-menu">
+            <a href="index.html">Início</a>
+            <a href="projects.html">Projetos</a>
+            <a href="tasks.html">Minhas Tarefas</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="my-focus.html">Meu Foco</a> <!-- Link to My Focus -->
+            <a href="settings.html">Configurações</a>
+            <a href="#" id="logout-button">Sair</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="my-focus-root"></div>
+    </main>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="assets/js/apiClient.js"></script>
+    <script src="assets/js/notificationService.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/react/my-focus/myFocusService.js"></script>
+    <script src="assets/js/react/my-focus/useMyFocusTasks.js"></script>
+    <script src="assets/js/react/my-focus/MyFocusTaskCard.js"></script>
+    <script src="assets/js/react/my-focus/MyFocusPage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const myFocusRoot = ReactDOM.createRoot(document.getElementById('my-focus-root'));
+            myFocusRoot.render(React.createElement(MyFocusPage));
+        });
+    </script>
+    <div id="feedback-root"></div>
+</body>
+</html>
